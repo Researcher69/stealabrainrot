@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Server Joiner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .brainrot-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .status {
+            font-size: 1.2rem;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .info {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .error {
+            background: rgba(255, 59, 48, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .success {
+            background: rgba(52, 199, 89, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="brainrot-icon">🧠</div>
+        <h1>Brainrot Joiner</h1>
+        <div class="status" id="status">Preparing to join server...</div>
+        <div id="message"></div>
+        <button class="button" id="retryBtn" style="display: none;" onclick="joinServer()">Retry Join</button>
+        <div class="info">
+            Works on Mobile & Desktop!<br>
+            Make sure you have Roblox installed.
+        </div>
+    </div>
+
+    <script>
+        // Get parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const placeId = urlParams.get('placeId') || '139527221'; // Default: Steal a Brainrot
+        const jobId = urlParams.get('jobId');
+
+        function showError(message) {
+            document.getElementById('status').innerHTML = '❌ Error';
+            document.getElementById('message').innerHTML = `<div class="error">${message}</div>`;
+            document.getElementById('retryBtn').style.display = 'inline-block';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('status').innerHTML = '✅ Success!';
+            document.getElementById('message').innerHTML = `<div class="success">${message}</div>`;
+        }
+
+        function joinServer() {
+            if (!jobId) {
+                showError('No Job ID provided! The link is invalid.');
+                return;
+            }
+
+            document.getElementById('status').innerHTML = 'Joining server... <div class="loading"></div>';
+            document.getElementById('retryBtn').style.display = 'none';
+
+            // Construct the Roblox deep link
+            const robloxUrl = `roblox://experiences/start?placeId=${placeId}&gameInstanceId=${jobId}`;
+            
+            // Also try the web URL as fallback
+            const webUrl = `https://www.roblox.com/games/start?placeId=${placeId}&launchData=${jobId}`;
+
+            // Try to open Roblox app first
+            window.location.href = robloxUrl;
+
+            // After a delay, show success and offer web link
+            setTimeout(() => {
+                showSuccess(`
+                    Opening Roblox...<br><br>
+                    If Roblox didn't open automatically:<br>
+                    <a href="${robloxUrl}" style="color: white; text-decoration: underline;">Click here to open Roblox App</a><br>
+                    or<br>
+                    <a href="${webUrl}" target="_blank" style="color: white; text-decoration: underline;">Open in Browser</a>
+                `);
+            }, 2000);
+        }
+
+        // Auto-join when page loads
+        if (jobId) {
+            joinServer();
+        } else {
+            showError('No Job ID provided in the URL!<br><br>URL format: ?placeId=XXXXX&jobId=XXXXX');
+        }
+    </script>
+</body>
+</html>
